@@ -1,4 +1,3 @@
-#!/bin/bash
 
 # added one comment
 import numpy as np
@@ -16,7 +15,7 @@ def get_data():
 
     dataset = []
 
-    num_files = 64
+    num_files = 250
     for i in range(num_files):
         diff_file_name = dataset_dir + file_prefix + str(i) + '.npy'
         diff_file = np.load(diff_file_name)
@@ -98,7 +97,7 @@ def main():
 
     # TODO: create dataloaders
     # TODO: figure out how to add the results to the data loader
-    train_loader = DataLoader(my_data, batch_size=64, shuffle=True)
+    train_loader = DataLoader(my_data, batch_size=250, shuffle=True)
     test_loader = DataLoader(my_data, batch_size=8, shuffle=True)
 
     net = Net()
