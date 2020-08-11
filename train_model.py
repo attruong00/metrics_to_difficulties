@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# added one comment
 import numpy as np
 import random
 import math
