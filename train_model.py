@@ -1,5 +1,3 @@
-
-# added one comment
 import numpy as np
 import random
 import math
@@ -8,6 +6,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 from torch.utils.data import Dataset, DataLoader
+from data_process import MetricsDataset
 
 def get_data():
     dataset_dir = '/home/users/atruong/jackal_ws/src/jackal_simulator/jackal_gazebo/worlds/jackal-map-creation/'
@@ -15,7 +14,7 @@ def get_data():
 
     dataset = []
 
-    num_files = 250
+    num_files = 32
     for i in range(num_files):
         diff_file_name = dataset_dir + file_prefix + str(i) + '.npy'
         diff_file = np.load(diff_file_name)
@@ -94,10 +93,12 @@ def main():
     x = get_data()
     y = create_fake_results(x)
     my_data = MyDataSet(x, y)
+    # change to Metrics Dataset later
+    # Metrics dataset sig: (self, metrics_dir, results_file, path_dir)
 
-    # TODO: create dataloaders
-    # TODO: figure out how to add the results to the data loader
-    train_loader = DataLoader(my_data, batch_size=250, shuffle=True)
+    # dataloaders
+    # TODO: may not need test_loader (??) if I'm training on the entire batch
+    train_loader = DataLoader(my_data, batch_size=32, shuffle=True)
     test_loader = DataLoader(my_data, batch_size=8, shuffle=True)
 
     net = Net()
