@@ -9,7 +9,7 @@ from torch.utils.data import Dataset, DataLoader
 from data_process import MetricsDataset
 
 def get_data():
-    dataset_dir = '/home/users/atruong/jackal_ws/src/jackal_simulator/jackal_gazebo/worlds/jackal-map-creation/'
+    dataset_dir = '../diff_files/'
     file_prefix = 'difficulties_'
 
     dataset = []
@@ -77,9 +77,9 @@ class Net(nn.Module):
     def __init__(self):
         super().__init__()
 
-        self.fc1 = nn.Linear(6, 4)
-        self.fc2 = nn.Linear(4, 3)
-        self.fc3 = nn.Linear(3, 2)
+        self.fc1 = nn.Linear(6, 256)
+        self.fc2 = nn.Linear(256, 32)
+        self.fc3 = nn.Linear(32, 2)
 
     def forward(self, x):
         x = F.relu(self.fc1(x))
@@ -90,21 +90,21 @@ class Net(nn.Module):
 
 def main():
     # create dataset
-    x = get_data()
-    y = create_fake_results(x)
-    my_data = MyDataSet(x, y)
+    my_data = MetricsDataset('../diff_files/', '../nn_input_1.npy', '../path_files/')
+    train_data, test_data = torch.utils.data.random_split(my_data, [250, 50])
+    print("Train dataset size:", len(train_data))
+    print("Test dataset size:", len(test_data))
     # change to Metrics Dataset later
     # Metrics dataset sig: (self, metrics_dir, results_file, path_dir)
 
     # dataloaders
     # TODO: may not need test_loader (??) if I'm training on the entire batch
-    train_loader = DataLoader(my_data, batch_size=32, shuffle=True)
-    test_loader = DataLoader(my_data, batch_size=8, shuffle=True)
+    train_loader = DataLoader(train_data, batch_size=250, shuffle=True)
+    test_loader = DataLoader(test_data, batch_size=1, shuffle=True)
 
     net = Net()
-    net = net.float()
     lossf = nn.MSELoss()
-    optimizer = optim.SGD(net.parameters(), lr=0.01)
+    optimizer = optim.SGD(net.parameters(), lr=0.003, weight_decay=0.1)
 
     # loop over dataset multiple times
     epochs = 1_000
@@ -121,6 +121,18 @@ def main():
             optimizer.step()
 
             print(loss)
+    
+    print('Testing *********************************************')
+    with torch.no_grad():
+
+        # train model
+        # currently not using idx but leaving it there in case
+        for idx, (x, y) in enumerate(test_loader):
+            pred = net(x)
+            # loss = lossf(pred, y)
+
+            print(pred, y)
+
 
 if __name__ == "__main__":
     main()
