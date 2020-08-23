@@ -8,55 +8,6 @@ import torch.optim as optim
 from torch.utils.data import Dataset, DataLoader
 from data_process import MetricsDataset
 
-def get_data():
-    dataset_dir = '../diff_files/'
-    file_prefix = 'difficulties_'
-
-    dataset = []
-
-    num_files = 32
-    for i in range(num_files):
-        diff_file_name = dataset_dir + file_prefix + str(i) + '.npy'
-        diff_file = np.load(diff_file_name)
-        dataset.append(diff_file[:-1])
-    
-    dataset = np.array(dataset)
-    print(dataset)
-    return dataset
-
-# manipulate inputs to get a test output (mean, variance)
-# datapoint is the difficulties array, won't use the average
-def fake_result_function(datapoint):
-    mean = 0
-    
-    mean += datapoint[0]
-    mean += 3 * datapoint[1]
-    mean += datapoint[2] ** 2
-    mean += datapoint[3] * 2 + datapoint[4]
-    # skip the last metric since it's just the average
-
-    variance = 0
-    for i in range(1, len(datapoint)):
-        variance += math.fabs(datapoint[i] - datapoint[i - 1])
-    
-    # add some noise
-    mean += random.randint(-1, 1) / 100.0
-    variance += random.randint(-1, 1) / 100.0
-
-    return mean, variance
-
-
-# generate some fake results to test the pipeline
-# returns numpy array
-def create_fake_results(dataset):
-    # dataset obtained from get_data
-    num_results = len(dataset)
-
-    result_arr = np.empty([num_results, 2])
-    for i in range(num_results):
-        result_arr[i][0], result_arr[i][1] = fake_result_function(dataset[i])
-    
-    return result_arr
 
 
 class MyDataSet(Dataset):
@@ -89,22 +40,19 @@ class Net(nn.Module):
 
 
 def main():
-    # create dataset
-    my_data = MetricsDataset('../diff_files/', '../nn_input_1.npy', '../path_files/')
+    # create dataset and split between train and test sets
+    my_data = MetricsDataset('../diff_files/', '../nn_input_dwa_only.npy', '../path_files/')
     train_data, test_data = torch.utils.data.random_split(my_data, [250, 50])
     print("Train dataset size:", len(train_data))
     print("Test dataset size:", len(test_data))
-    # change to Metrics Dataset later
-    # Metrics dataset sig: (self, metrics_dir, results_file, path_dir)
 
-    # dataloaders
-    # TODO: may not need test_loader (??) if I'm training on the entire batch
+    # load data
     train_loader = DataLoader(train_data, batch_size=250, shuffle=True)
-    test_loader = DataLoader(test_data, batch_size=1, shuffle=True)
+    test_loader = DataLoader(test_data, batch_size=1, shuffle=False)
 
     net = Net()
     lossf = nn.MSELoss()
-    optimizer = optim.SGD(net.parameters(), lr=0.003, weight_decay=0.1)
+    optimizer = optim.SGD(net.parameters(), lr=0.003)
 
     # loop over dataset multiple times
     epochs = 1_000
@@ -125,12 +73,12 @@ def main():
     print('Testing *********************************************')
     with torch.no_grad():
 
-        # train model
+        # test model
         # currently not using idx but leaving it there in case
         for idx, (x, y) in enumerate(test_loader):
             pred = net(x)
             # loss = lossf(pred, y)
-
+            # print(loss)
             print(pred, y)
 
 
