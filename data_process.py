@@ -38,17 +38,22 @@ class MetricsDataset(Dataset):
             self.results[i][0] /= path_length
             self.results[i][1] /= path_length
             
+        # quick adjustment to see results without variance
+        self.results_no_std = [0 for i in range(self.n)]
+        for i in range(self.n):
+            self.results_no_std[i] = self.results[i][0]
 
         # get all difficulty files
         self.diffs = []
         for i in range(self.n):
             diff_file = metrics_dir + 'norm_metrics_' + str(i) + '.npy'
 
-            self.diffs.append(np.load(diff_file)[:5]) # 5 metrics
+            self.diffs.append(np.load(diff_file)) # 5 metrics
 
         # convert to torch tensor
         self.diffs = torch.as_tensor(self.diffs).float()
         self.results = torch.as_tensor(self.results).float()
+        self.results_no_std = torch.tensor(self.results_no_std).float()
 
 
     def __len__(self):
@@ -56,7 +61,8 @@ class MetricsDataset(Dataset):
 
 
     def __getitem__(self, index):
-        return self.diffs[index], self.results[index]
+        # quick fix to scrap variance
+        return self.diffs[index], self.results_no_std[index]
 
 
 def text_to_array(file_name, num_trials, special_val):
