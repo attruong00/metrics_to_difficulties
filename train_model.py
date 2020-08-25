@@ -13,34 +13,40 @@ class Net(nn.Module):
     def __init__(self):
         super().__init__()
 
-        self.fc1 = nn.Linear(6, 256)
-        self.fc2 = nn.Linear(256, 32)
-        self.fc3 = nn.Linear(32, 2)
+        self.fc1 = nn.Linear(5, 16)
+        self.fc2 = nn.Linear(16, 32)
+        self.fc3 = nn.Linear(32, 64)
+        self.fc4 = nn.Linear(64, 16)
+        self.fc5 = nn.Linear(16, 4)
+        self.fc6 = nn.Linear(4, 2)
 
     def forward(self, x):
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
-        x = self.fc3(x)
+        x = F.relu(self.fc3(x))
+        x = F.relu(self.fc4(x))
+        x = F.relu(self.fc5(x))
+        x = self.fc6(x)
         return x
 
 
 def main():
     # create dataset and split between train and test sets
-    my_data = MetricsDataset('../diff_files/', '../nn_input_1.npy', '../path_files/')
+    my_data = MetricsDataset('../norm_metrics_files/', '../nn_input_1.npy', '../path_files/')
     train_data, test_data = torch.utils.data.random_split(my_data, [250, 50])
     print("Train dataset size:", len(train_data))
     print("Test dataset size:", len(test_data))
 
     # load data
     train_loader = DataLoader(train_data, batch_size=250, shuffle=True)
-    test_loader = DataLoader(test_data, batch_size=50, shuffle=False)
+    test_loader = DataLoader(test_data, batch_size=1, shuffle=False)
 
     net = Net()
     lossf = nn.MSELoss()
-    optimizer = optim.SGD(net.parameters(), lr=0.003)
+    optimizer = optim.SGD(net.parameters(), lr=0.0001)
 
     # loop over dataset multiple times
-    epochs = 1_000
+    epochs = 100_000
     for i in range(epochs):
 
         # train model
@@ -53,7 +59,8 @@ def main():
             loss.backward()
             optimizer.step()
 
-            print(loss)
+            if epochs % 100 == 0:
+                print(loss)
     
     print('Testing *********************************************')
     with torch.no_grad():
@@ -63,8 +70,8 @@ def main():
         for idx, (x, y) in enumerate(test_loader):
             pred = net(x)
             loss = lossf(pred, y)
-            print(loss)
-            # print(pred, y)
+            # print(loss)
+            print(pred, y)
 
 
 if __name__ == "__main__":
