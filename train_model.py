@@ -14,9 +14,9 @@ class Net(nn.Module):
         super().__init__()
 
         self.fc1 = nn.Linear(5, 64)
-        self.fc2 = nn.Linear(64, 32)
-        self.fc3 = nn.Linear(32, 1)
-        # self.fc4 = nn.Linear(64, 16)
+        self.fc2 = nn.Linear(64, 16)
+        self.fc3 = nn.Linear(16, 1)
+        # self.fc4 = nn.Linear(16, 1)
         # self.fc5 = nn.Linear(16, 4)
         # self.fc6 = nn.Linear(4, 2)
 
@@ -30,9 +30,12 @@ class Net(nn.Module):
         return x
 
 
-def main():
+def main(penalty=35, alpha=0.001, epochs=10_000):
     # create dataset and split between train and test sets
-    my_data = MetricsDataset('../norm_metrics_files/', 'penalty_40_means.npy', '../path_files/')
+    metrics_dir = '../norm_metrics_files/'
+    paths_dir = '../path_files/'
+    results_file = '../time_results_10/penalty_%d_means.npy' % penalty
+    my_data = MetricsDataset(metrics_dir, results_file, paths_dir)
     train_data, test_data = torch.utils.data.random_split(my_data, [250, 50])
     print("Train dataset size:", len(train_data))
     print("Test dataset size:", len(test_data))
@@ -43,10 +46,10 @@ def main():
 
     net = Net()
     lossf = nn.MSELoss()
-    optimizer = optim.SGD(net.parameters(), lr=0.001)
+    optimizer = optim.SGD(net.parameters(), lr=alpha)
 
     # loop over dataset multiple times
-    epochs = 3_000
+    # epochs = 10_000
     for i in range(epochs):
 
         # train model
@@ -60,8 +63,8 @@ def main():
             loss.backward()
             optimizer.step()
             
-            if i % 100 == 0:
-                print(loss)
+            if i == epochs - 1:
+                print('final training loss:', loss)
     
     print('Testing *********************************************')
     with torch.no_grad():
@@ -75,8 +78,8 @@ def main():
             loss = lossf(pred, y)
             running_loss += loss
             # print(loss)
-            print(x, y, pred)
-        print(running_loss / 50.0)
+            # print(x, y, pred)
+        print('test loss:', running_loss / 50.0)
 
 
 if __name__ == "__main__":
