@@ -16,6 +16,19 @@ def path_len(path):
     
     return total_dist
 
+def normalize_results(results_array):
+
+    mean = np.mean(results_array)
+    std_dev = np.std(results_array)
+
+    print(mean)
+    print(std_dev)
+
+    for i in range(len(results_array)):
+        results_array[i] -= mean
+        results_array[i] /= std_dev
+
+    return results_array
 
 class MetricsDataset(Dataset):
 
@@ -35,11 +48,18 @@ class MetricsDataset(Dataset):
             path_file = path_dir + 'path_' + str(i) + '.npy'
             
             path_length = resolution * path_len(np.load(path_file))
+            
             """
             self.results[i][0] /= path_length
             self.results[i][1] /= path_length
             """
             self.results[i] /= path_length
+        
+        # normalize results by mean/std_dev
+        # self.results = normalize_results(self.results)
+
+        print('average result', np.mean(self.results))
+        print('standard dev result', np.std(self.results))
             
         """
         # quick adjustment to see results without variance
@@ -58,7 +78,7 @@ class MetricsDataset(Dataset):
         # convert to torch tensor
         self.diffs = torch.as_tensor(self.diffs).float()
         self.results = torch.as_tensor(self.results).float()
-        # self.results_no_std = torch.tensor(self.results).float()
+        # self.results_no_std = torch.tensor(self.results_no_std).float()
 
 
     def __len__(self):
@@ -91,20 +111,22 @@ def text_to_array(file_name, num_trials, special_val):
     
     return result
 
-def main():
-    dwa_file_name = "time_results_7/dwa_results_%d.txt"
-    eband_file_name = "time_results_7/eband_results_%d.txt"
+def change_penalty():
+    dwa_file_name = "../time_results_10/dwa_results_%d.txt"
+    eband_file_name = "../time_results_10/eband_results_%d.txt"
+    output_file_name = "../time_results_10/penalty_%d_means.npy"
+    penalty = 35
 
     results = []
     for i in range(1, 5):
-        trial = text_to_array(dwa_file_name % i, 300, 35.0)
+        trial = text_to_array(dwa_file_name % i, 300, penalty)
         results.append(trial)
         
         # print(i)
         # print(trial)
 
     for i in range(1, 4):
-        trial = text_to_array(eband_file_name % i, 300, 35.0)
+        trial = text_to_array(eband_file_name % i, 300, penalty)
         results.append(trial)
         
         # print(i)
@@ -113,9 +135,9 @@ def main():
     results = np.asarray(results)
     results = np.mean(results, axis=0)
     print(len(results))
-    np.save("penalty_35_means.npy", results)
+    np.save(output_file_name % penalty, results)
     
 
 
 if __name__ == "__main__":
-    main()
+    change_penalty()
