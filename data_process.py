@@ -35,13 +35,18 @@ class MetricsDataset(Dataset):
             path_file = path_dir + 'path_' + str(i) + '.npy'
             
             path_length = resolution * path_len(np.load(path_file))
+            """
             self.results[i][0] /= path_length
             self.results[i][1] /= path_length
+            """
+            self.results[i] /= path_length
             
+        """
         # quick adjustment to see results without variance
         self.results_no_std = [0 for i in range(self.n)]
         for i in range(self.n):
             self.results_no_std[i] = self.results[i][0]
+        """
 
         # get all difficulty files
         self.diffs = []
@@ -53,7 +58,7 @@ class MetricsDataset(Dataset):
         # convert to torch tensor
         self.diffs = torch.as_tensor(self.diffs).float()
         self.results = torch.as_tensor(self.results).float()
-        self.results_no_std = torch.tensor(self.results_no_std).float()
+        # self.results_no_std = torch.tensor(self.results).float()
 
 
     def __len__(self):
@@ -62,7 +67,7 @@ class MetricsDataset(Dataset):
 
     def __getitem__(self, index):
         # quick fix to scrap variance
-        return self.diffs[index], self.results_no_std[index]
+        return self.diffs[index], self.results[index]
 
 
 def text_to_array(file_name, num_trials, special_val):
@@ -87,15 +92,30 @@ def text_to_array(file_name, num_trials, special_val):
     return result
 
 def main():
-    dwa_file_name = "timing_results/dwa_results_%d.txt"
+    dwa_file_name = "time_results_7/dwa_results_%d.txt"
+    eband_file_name = "time_results_7/eband_results_%d.txt"
 
     results = []
-    for i in range(1, 4):
-        trial = text_to_array(dwa_file_name % i, 300, 40.0)
+    for i in range(1, 5):
+        trial = text_to_array(dwa_file_name % i, 300, 35.0)
         results.append(trial)
         
-        print(i)
-        print(trial)
+        # print(i)
+        # print(trial)
+
+    for i in range(1, 4):
+        trial = text_to_array(eband_file_name % i, 300, 35.0)
+        results.append(trial)
+        
+        # print(i)
+        # print(trial)
+    
+    results = np.asarray(results)
+    results = np.mean(results, axis=0)
+    print(len(results))
+    np.save("penalty_35_means.npy", results)
+    
+
 
 if __name__ == "__main__":
     main()
