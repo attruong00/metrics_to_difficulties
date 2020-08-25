@@ -39,7 +39,7 @@ def main():
 
     # load data
     train_loader = DataLoader(train_data, batch_size=250, shuffle=True)
-    test_loader = DataLoader(test_data, batch_size=1, shuffle=False)
+    test_loader = DataLoader(test_data, batch_size=1, shuffle=True)
 
     net = Net()
     lossf = nn.MSELoss()
@@ -75,7 +75,7 @@ def main():
             loss = lossf(pred, y)
             running_loss += loss
             # print(loss)
-            print(pred, y)
+            print(x, y, pred)
         print(running_loss / 50.0)
 
 
