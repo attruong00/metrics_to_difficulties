@@ -6,12 +6,12 @@ import train_model
 def main():
     layers = 3
     penalty_vals = range(30, 55, 5)
-    epoch_vals = [1_000, 3_000, 10_000, 30_000, 100_000]
+    epoch_vals = [1_000, 3_000, 10_000, 30_000]
     lr_vals = [0.0001, 0.0003, 0.001, 0.003, 0.01]
 
     params_list = ['Epochs', 'Alpha', 'AvgTestLoss', 'StdTestLoss', 'AvgLoss/DataStd']
 
-    num_trials = 10
+    num_trials = 5
     
     with open('loss_3_layers.txt', 'a') as f:
         f.write(f'Layers: {layers}')
@@ -19,7 +19,7 @@ def main():
         for pen_val in penalty_vals:
 
             f.write(f'\n\n\nPenalty {pen_val}\n')
-            results_avg, results_std = data_process.change_penalty(pen_val)
+            results_avg, results_std = data_process.penalty_stats(pen_val)
             f.write(f'Data average: {results_avg:.5f}\n')
             f.write(f'Data standard dev: {results_std:.5}\n\n')
 

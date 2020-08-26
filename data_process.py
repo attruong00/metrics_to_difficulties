@@ -113,7 +113,7 @@ def normalize_pathlen(results, paths_dir):
         for j in range(10): # 10 trials total
             results[j][i] /= path_length
 
-def change_penalty(penalty=40):
+def change_penalty(penalty=50):
     paths_dir = "../path_files/"
     dwa_file_name = "time_results_10/dwa_results_%d.txt"
     eband_file_name = "time_results_10/eband_results_%d.txt"
@@ -140,7 +140,11 @@ def change_penalty(penalty=40):
     np.save(output_file_name, results)
     return np.mean(results), np.std(results)
     
-
+# file must exist already
+def penalty_stats(penalty=40):
+    file_name = "time_results_10/penalty_%d_means.npy" % penalty
+    results = np.load(file_name)
+    return np.mean(results), np.std(results)
 
 if __name__ == "__main__":
     change_penalty()
