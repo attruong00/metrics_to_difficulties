@@ -9,6 +9,8 @@ def main():
     epoch_vals = [1_000, 3_000, 10_000, 30_000, 100_000]
     lr_vals = [0.0001, 0.0003, 0.001, 0.003, 0.01]
 
+    params_list = ['Epochs', 'Alpha', 'AvgTestLoss', 'StdTestLoss', 'AvgLoss/DataSted']
+
     num_trials = 1
     
     with open('hyperparam_results.txt', 'w') as f:
@@ -16,16 +18,21 @@ def main():
 
         for pen_val in penalty_vals:
 
-            f.write(f'\n\nPenalty {pen_val}\n')
+            f.write(f'\n\n\nPenalty {pen_val}\n')
             results_avg, results_std = data_process.change_penalty(pen_val)
             f.write(f'Data average: {results_avg:.5f}\n')
-            f.write(f'Data standard dev: {results_std:.5}\n')
+            f.write(f'Data standard dev: {results_std:.5}\n\n')
+
+            # column labels
+            for param in params_list:
+                f.write(f'{param:15}')
+            f.write('\n')
 
             for eps in epoch_vals:
                 for lr in lr_vals:
 
-                    f.write(f'\nEpochs {eps:8d}  ')
-                    f.write(f'Alph {lr:6.4f}  ')
+                    f.write(f'{eps:<15d}')
+                    f.write(f'{lr:<15.4f}')
 
                     # average the test loss over several trials
                     test_loss = []
@@ -36,9 +43,9 @@ def main():
                     test_loss = np.asarray(test_loss)
                     test_loss_avg, test_loss_std = np.mean(test_loss), np.std(test_loss)
                     test_loss_norm = test_loss_avg / results_std
-                    f.write(f'AvgTestLoss {test_loss_avg:10.5f}  ')
-                    f.write(f'StdTestLoss {test_loss_std:10.5f}')
-                    f.write(f'AvgTestLoss / dataStd {test_loss_norm:.5f}\n')
+                    f.write(f'{test_loss_avg:<15.5f}  ')
+                    f.write(f'{test_loss_std:<15.5f}')
+                    f.write(f'{test_loss_norm:<15.5f}\n')
 
 if __name__ == "__main__":
     main()
