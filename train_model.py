@@ -33,9 +33,8 @@ class Net(nn.Module):
 def main(penalty=35, alpha=0.001, epochs=10_000):
     # create dataset and split between train and test sets
     metrics_dir = '../norm_metrics_files/'
-    paths_dir = '../path_files/'
     results_file = 'time_results_10/penalty_%d_means.npy' % penalty
-    my_data = MetricsDataset(metrics_dir, results_file, paths_dir)
+    my_data = MetricsDataset(metrics_dir, results_file)
     train_data, test_data = torch.utils.data.random_split(my_data, [250, 50])
     print("Train dataset size:", len(train_data))
     print("Test dataset size:", len(test_data))
