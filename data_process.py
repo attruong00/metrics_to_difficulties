@@ -5,6 +5,7 @@ import torch
 from torch.utils.data import Dataset
 
 resolution = 0.15 # meters per pixel
+num_worlds = 300
 
 # path is array of points (row, col)
 def path_len(path):
@@ -34,26 +35,13 @@ class MetricsDataset(Dataset):
 
     # metrics_dir is the folder where the metrics npy arrays are stored
     # results_file is file with all results stored as Nx2 numpy array,
-    # each result should have mean and variance
-    # path_dir is the folder with the generated paths
-    def __init__(self, metrics_dir, results_file, path_dir):
+    # each result should have mean traversal time divided by path length
+    def __init__(self, metrics_dir, results_file):
         super().__init__()
         self.metrics_dir = metrics_dir
 
         self.results = np.load(results_file)
         self.n = len(self.results)
-
-        # normalize results by path length
-        for i in range(self.n):
-            path_file = path_dir + 'path_' + str(i) + '.npy'
-            
-            path_length = resolution * path_len(np.load(path_file))
-            
-            """
-            self.results[i][0] /= path_length
-            self.results[i][1] /= path_length
-            """
-            self.results[i] /= path_length
         
         # normalize results by mean/std_dev
         # self.results = normalize_results(self.results)
@@ -116,29 +104,38 @@ def text_to_array(file_name, num_trials, penalty_val):
     
     return result
 
+def normalize_pathlen(results, paths_dir):
+    # normalize results by path length
+    for i in range(num_worlds):
+        path_file = paths_dir + 'path_' + str(i) + '.npy'
+            
+        path_length = resolution * path_len(np.load(path_file))
+        results[i] /= path_length
+
 def change_penalty(penalty=40):
+    paths_dir = "../path_files/"
     dwa_file_name = "time_results_10/dwa_results_%d.txt"
     eband_file_name = "time_results_10/eband_results_%d.txt"
     output_file_name = "time_results_10/penalty_%d_means.npy" % penalty
 
+    # append all timed results to results
     results = []
     for i in range(1, 6):
-        trial = text_to_array(dwa_file_name % i, 300, penalty)
+        trial = text_to_array(dwa_file_name % i, num_worlds, penalty)
         results.append(trial)
-        
-        # print(i)
-        # print(trial)
 
     for i in range(1, 6):
-        trial = text_to_array(eband_file_name % i, 300, penalty)
+        trial = text_to_array(eband_file_name % i, num_worlds, penalty)
         results.append(trial)
-        
-        # print(i)
-        # print(trial)
     
+    # divide means by length of path
+    normalize_pathlen(results, paths_dir)
+    # convert to numpy array
     results = np.asarray(results)
+    # take the mean of all trials
     results = np.mean(results, axis=0)
     print(len(results))
+    # save and return
     np.save(output_file_name, results)
     return np.mean(results), np.std(results)
     
