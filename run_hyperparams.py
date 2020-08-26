@@ -13,7 +13,7 @@ def main():
 
     num_trials = 10
     
-    with open('hyperparam_results.txt', 'w') as f:
+    with open('loss_3_layers.txt', 'a') as f:
         f.write(f'Layers: {layers}')
 
         for pen_val in penalty_vals:
