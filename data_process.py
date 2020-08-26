@@ -110,7 +110,8 @@ def normalize_pathlen(results, paths_dir):
         path_file = paths_dir + 'path_' + str(i) + '.npy'
             
         path_length = resolution * path_len(np.load(path_file))
-        results[i] /= path_length
+        for j in range(10): # 10 trials total
+            results[j][i] /= path_length
 
 def change_penalty(penalty=40):
     paths_dir = "../path_files/"

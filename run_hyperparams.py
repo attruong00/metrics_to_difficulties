@@ -9,9 +9,9 @@ def main():
     epoch_vals = [1_000, 3_000, 10_000, 30_000, 100_000]
     lr_vals = [0.0001, 0.0003, 0.001, 0.003, 0.01]
 
-    params_list = ['Epochs', 'Alpha', 'AvgTestLoss', 'StdTestLoss', 'AvgLoss/DataSted']
+    params_list = ['Epochs', 'Alpha', 'AvgTestLoss', 'StdTestLoss', 'AvgLoss/DataStd']
 
-    num_trials = 1
+    num_trials = 10
     
     with open('hyperparam_results.txt', 'w') as f:
         f.write(f'Layers: {layers}')
