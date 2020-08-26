@@ -34,7 +34,7 @@ def main(penalty=35, alpha=0.001, epochs=10_000):
     # create dataset and split between train and test sets
     metrics_dir = '../norm_metrics_files/'
     paths_dir = '../path_files/'
-    results_file = '../time_results_10/penalty_%d_means.npy' % penalty
+    results_file = 'time_results_10/penalty_%d_means.npy' % penalty
     my_data = MetricsDataset(metrics_dir, results_file, paths_dir)
     train_data, test_data = torch.utils.data.random_split(my_data, [250, 50])
     print("Train dataset size:", len(train_data))
@@ -79,7 +79,9 @@ def main(penalty=35, alpha=0.001, epochs=10_000):
             running_loss += loss
             # print(loss)
             # print(x, y, pred)
-        print('test loss:', running_loss / 50.0)
+        test_loss = running_loss.item() / 50.0
+        print('test loss:', test_loss)
+        return test_loss
 
 
 if __name__ == "__main__":

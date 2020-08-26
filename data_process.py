@@ -91,15 +91,20 @@ class MetricsDataset(Dataset):
 
 
 def text_to_array(file_name, num_trials, penalty_val):
+    # read in lines
+    # format: trial number (1-indexed) followed by result on next line
     f = open(file_name, "r")
-
     lines = f.readlines()
+    f.close()
 
+    # create result array
     result = [0 for i in range(num_trials)]
 
+    # store values in result array
     for i in range(num_trials):
         index = int(lines[i * 2])
 
+        # check for repeats or missing results
         if not index == i:
             print("ERROR: expected %d, actual %d" %i %index)
             break
@@ -112,9 +117,9 @@ def text_to_array(file_name, num_trials, penalty_val):
     return result
 
 def change_penalty(penalty=40):
-    dwa_file_name = "../time_results_10/dwa_results_%d.txt"
-    eband_file_name = "../time_results_10/eband_results_%d.txt"
-    output_file_name = "../time_results_10/penalty_%d_means.npy"
+    dwa_file_name = "time_results_10/dwa_results_%d.txt"
+    eband_file_name = "time_results_10/eband_results_%d.txt"
+    output_file_name = "time_results_10/penalty_%d_means.npy" % penalty
 
     results = []
     for i in range(1, 6):
@@ -134,7 +139,7 @@ def change_penalty(penalty=40):
     results = np.asarray(results)
     results = np.mean(results, axis=0)
     print(len(results))
-    np.save(output_file_name % penalty, results)
+    np.save(output_file_name, results)
     return np.mean(results), np.std(results)
     
 
