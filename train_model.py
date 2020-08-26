@@ -36,8 +36,7 @@ def main(penalty=35, alpha=0.001, epochs=10_000):
     results_file = 'time_results_10/penalty_%d_means.npy' % penalty
     my_data = MetricsDataset(metrics_dir, results_file)
     train_data, test_data = torch.utils.data.random_split(my_data, [250, 50])
-    print("Train dataset size:", len(train_data))
-    print("Test dataset size:", len(test_data))
+    
 
     # load data
     train_loader = DataLoader(train_data, batch_size=250, shuffle=True)
@@ -47,6 +46,16 @@ def main(penalty=35, alpha=0.001, epochs=10_000):
     lossf = nn.MSELoss()
     optimizer = optim.SGD(net.parameters(), lr=alpha)
 
+    # print params
+    print('*****************************')
+    print('Train dataset size:', len(train_data))
+    print('Test dataset size:', len(test_data))
+    print('Layers', 3)
+    print('Penalty', penalty)
+    print('Learning rate', alpha)
+    print('Epochs', epochs)
+    print()
+    print('Training...')
     # loop over dataset multiple times
     # epochs = 10_000
     for i in range(epochs):
@@ -63,9 +72,9 @@ def main(penalty=35, alpha=0.001, epochs=10_000):
             optimizer.step()
             
             if i == epochs - 1:
-                print('final training loss:', loss)
+                print('final training loss:', loss.item())
     
-    print('Testing *********************************************')
+    print('Testing...')
     with torch.no_grad():
 
         # test model
