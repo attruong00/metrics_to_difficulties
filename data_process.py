@@ -90,7 +90,7 @@ class MetricsDataset(Dataset):
         return self.diffs[index], self.results[index]
 
 
-def text_to_array(file_name, num_trials, special_val):
+def text_to_array(file_name, num_trials, penalty_val):
     f = open(file_name, "r")
 
     lines = f.readlines()
@@ -106,26 +106,25 @@ def text_to_array(file_name, num_trials, special_val):
 
         val = float(lines[i * 2 + 1])
         if (val == 50.0):
-            val = special_val
+            val = penalty_val
         result[index] = val
     
     return result
 
-def change_penalty():
+def change_penalty(penalty=40):
     dwa_file_name = "../time_results_10/dwa_results_%d.txt"
     eband_file_name = "../time_results_10/eband_results_%d.txt"
     output_file_name = "../time_results_10/penalty_%d_means.npy"
-    penalty = 35
 
     results = []
-    for i in range(1, 5):
+    for i in range(1, 6):
         trial = text_to_array(dwa_file_name % i, 300, penalty)
         results.append(trial)
         
         # print(i)
         # print(trial)
 
-    for i in range(1, 4):
+    for i in range(1, 6):
         trial = text_to_array(eband_file_name % i, 300, penalty)
         results.append(trial)
         
@@ -136,6 +135,7 @@ def change_penalty():
     results = np.mean(results, axis=0)
     print(len(results))
     np.save(output_file_name % penalty, results)
+    return np.mean(results), np.std(results)
     
 
 
