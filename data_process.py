@@ -94,7 +94,7 @@ def text_to_array(file_name, num_trials, penalty_val):
 
         # check for repeats or missing results
         if not index == i:
-            print("ERROR: expected %d, actual %d" %i %index)
+            print(f'Error line')
             break
 
         val = float(lines[i * 2 + 1])
@@ -104,40 +104,55 @@ def text_to_array(file_name, num_trials, penalty_val):
     
     return result
 
-def normalize_pathlen(results, paths_dir):
+def normalize_pathlen(results, paths_dir, num_trials):
     # normalize results by path length
     for i in range(num_worlds):
         path_file = paths_dir + 'path_' + str(i) + '.npy'
             
         path_length = resolution * path_len(np.load(path_file))
-        for j in range(10): # 10 trials total
+        for j in range(num_trials):
             results[j][i] /= path_length
 
 def change_penalty(penalty=50):
-    paths_dir = "../path_files/"
+    paths_dir = "../test_data/path_files/"
+
+    """
     dwa_file_name = "time_results_10/dwa_results_%d.txt"
     eband_file_name = "time_results_10/eband_results_%d.txt"
-    output_file_name = "time_results_10/penalty_%d_means.npy" % penalty
+    """
+    input_file_name = "../test_data/phys_results_avg.txt"
+    output_file_name = "../test_data/phys_results.npy"
 
+    """
     # append all timed results to results
     results = []
+    
     for i in range(1, 6):
         trial = text_to_array(dwa_file_name % i, num_worlds, penalty)
         results.append(trial)
-
+    
+    
     for i in range(1, 6):
         trial = text_to_array(eband_file_name % i, num_worlds, penalty)
         results.append(trial)
-    
+    """
     # divide means by length of path
-    normalize_pathlen(results, paths_dir)
+    normalize_pathlen(results, paths_dir, num_trials=5)
     # convert to numpy array
     results = np.asarray(results)
+
+    # changed to do both metrics
     # take the mean of all trials
-    results = np.mean(results, axis=0)
-    print(len(results))
+    means = np.mean(results, axis=0)
+    stdevs = np.std(results, axis=0)
+    both_stats = [[0 for i in range(2)] for j in range(num_worlds)]
+    for i in range(num_worlds):
+        both_stats[i][0], both_stats[i][1] = means[i], stdevs[i]
+
+    both_stats = np.asarray(both_stats)
+    print(both_stats)
     # save and return
-    np.save(output_file_name, results)
+    np.save(output_file_name, both_stats)
     return np.mean(results), np.std(results)
     
 # file must exist already
@@ -146,5 +161,34 @@ def penalty_stats(penalty=40):
     results = np.load(file_name)
     return np.mean(results), np.std(results)
 
+def normalize_pathlen_1d(results, paths_dir, num_envs):
+    # normalize results by path length
+    for i in range(num_envs):
+        path_file = paths_dir + 'path_' + str(i) + '.npy'
+        path_length = resolution * path_len(np.load(path_file))
+        norm_path_len = results[i] / path_length
+        print(i + 1, path_length, results[i], norm_path_len)
+        results[i] = norm_path_len
+
+def store_phys_results():
+    input_file_name = "../test_data/phys_results_avg.txt"
+    output_file_name = "../test_data/phys_results.npy"
+    results = text_to_array(input_file_name, num_trials=10, penalty_val=30)
+    normalize_pathlen_1d(results, "../test_data/path_files/", 10)
+    np.save(output_file_name, results)
+
+def record_pathlens():
+    input_dir = '../test_data/path_files/'
+    input_file = 'path_%d.npy'
+    output_file = '../test_data/path_lengths.txt'
+
+    with open(output_file, 'w') as f:
+        for i in range(10):
+            path = np.load(input_dir + input_file % i)
+            path_length = resolution * path_len(path)
+            f.write(f'{i}\n')
+            f.write(f'{path_length}\n')
+
+
 if __name__ == "__main__":
-    change_penalty()
+    store_phys_results()
