@@ -10,6 +10,3 @@ UPDATE: new metrics files on shared drive, under folder called "norm_metrics_fil
 Currently training on all 300 simulation worlds and testing on physical world data. 
 The physical world data is included in test_data, so you may need to change the relative path of
 the test results because test_data used to be stored in a different folder.
-
-TODO: compare the relative order of predictions to the relative order of the actual test data.
-This will probably have to be automated because comparing the order by hand is very error prone.
